@@ -61,7 +61,7 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
       # running tests
-      - run: npx playwright test --project=${{ matrix.browser }}
+      - run: npx playwright test --browser=${{ matrix.browser }}
       - name: Upload Artifacts
         if: failure()
         uses: actions/upload-artifact@v3
