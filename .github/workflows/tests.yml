@@ -43,6 +43,7 @@ jobs:
 
       # installing browsers with cache
       - name: Store Playwright's Version
+        shell: bash
         run: echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')" >> $GITHUB_OUTPUT
         id: playwright-version
       - name: Cache browsers
