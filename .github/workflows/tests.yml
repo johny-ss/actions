@@ -19,10 +19,15 @@ jobs:
       fail-fast: false # keep running other jobs if one fails
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        browser: ["chromium", "firefox"]
-        include:
-          - os: macos-latest
+        browser: ["chromium", "firefox", webkit]
+        exclude:
+          - os: windows-latest
             browser: webkit
+          - os: ubuntu-latest
+            browser: webkit
+        # include:
+        #   - os: macos-latest
+        #     browser: webkit
     env:
       # Playwright uses this env var for the browser install path. See:
       # https://playwright.dev/docs/ci#directories-to-cache
@@ -49,8 +54,9 @@ jobs:
       - name: Store Playwright's Version
         shell: bash #necessary for it to work on Windows, which uses powershell by default
         run: |
-          echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')" >> $GITHUB_OUTPUT
-          echo "Playwright's Version: PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')"
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
         id: playwright-version
       - name: Cache browsers
         id: cache-browsers
