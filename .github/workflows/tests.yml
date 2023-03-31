@@ -42,7 +42,7 @@ jobs:
           path: ./node_modules
           key: modules-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
+        # if: steps.cache-deps.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
 
       # installing browsers with cache
