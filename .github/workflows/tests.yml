@@ -45,10 +45,7 @@ jobs:
       # installing browsers with cache
       - name: Store Playwright's Version
         shell: bash #necessary for it to work on Windows, which uses powershell by default
-        run: |
-          echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')"
-          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+        run: echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')" >> $GITHUB_OUTPUT
         id: playwright-version
       - name: Set Path for Browser Binaries
         shell: bash #powershell (windows) uses '\' instead of '/' for paths
