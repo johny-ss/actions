@@ -18,11 +18,12 @@ jobs:
     strategy:
       fail-fast: false # keep running other jobs if one fails
       matrix:
-        os: [macos-latest, windows-latest] #, ubuntu-latest]
-        browser: ["chromium", "firefox"]
-        include:
-          - os: macos-latest
-            browser: "webkit"
+        os: [macos-latest] #, windows-latest, ubuntu-latest]
+        browser: ["webkit"] #, "chromium", "firefox"]
+        # browser: ["chromium", "firefox"]
+        # include:
+        #   - os: macos-latest
+        #     browser: "webkit"
     env:
       # Playwright uses this env var for the browser install path. See:
       # https://playwright.dev/docs/ci#directories-to-cache
@@ -69,7 +70,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: Test Results
+          name: ${{ matrix.browser }}-${{ matrix.os }}-test-results
           path: test-results/
           retention-days: 7
 
