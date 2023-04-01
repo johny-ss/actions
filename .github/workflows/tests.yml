@@ -11,68 +11,68 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  # e2e:
-  #   # timeout-minutes: 60
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false # keep running other jobs if one fails
-  #     matrix:
-  #       os: [macos-latest] #, windows-latest, ubuntu-latest]
-  #       browser: ["webkit"] #, "chromium", "firefox"]
-  #       # browser: ["chromium", "firefox"]
-  #       # include:
-  #       #   - os: macos-latest
-  #       #     browser: "webkit"
-  #   env:
-  #     # Playwright uses this env var for the browser install path. See:
-  #     # https://playwright.dev/docs/ci#directories-to-cache
-  #     # It makes most sense to default this to something cross-platform
-  #     PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16
+# PLAYWRIGHT_BROWSERS_PATH=0
 
-  #     # installing dependencies with cache
-  #     - name: Cache dependencies
-  #       id: cache-deps
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: ./node_modules
-  #         key: modules-${{ hashFiles('package-lock.json') }}
-  #     - name: Install dependencies
-  #       if: steps.cache-deps.outputs.cache-hit != 'true'
-  #       run: npm ci --ignore-scripts
+jobs:
+  e2e:
+    # timeout-minutes: 60
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false # keep running other jobs if one fails
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        browser: [chromium, firefox]
+        include:
+          - os: macos-latest
+            browser: "webkit"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      # installing dependencies with cache
+      - name: Cache dependencies
+        id: cache-deps
+        uses: actions/cache@v3
+        with:
+          path: ./node_modules
+          key: modules-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
 
       # installing browsers with cache
-      # - name: Store Playwright's Version
-      #   shell: bash #necessary for it to work on Windows, which uses powershell by default
-      #   run: |
-      #     echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')"
-      #     echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-      #     echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
-      #   id: playwright-version
-      # - name: Cache browsers
-      #   id: cache-browsers
-      #   uses: actions/cache@v3
-      #   with:
-      #     key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
-      #     path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-      # - name: Download browsers
-      #   # if: steps.cache-browsers.outputs.cache-hit != 'true'
-      #   run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Store Playwright's Version
+        shell: bash #necessary for it to work on Windows, which uses powershell by default
+        run: |
+          echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')"
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+        id: playwright-version
+      - name: Set Path for Browser Binaries
+        shell: bash #powershell (windows) uses '\' instead of '/' for paths
+        run: |
+          echo "PLAYWRIGHT_BROWSERS_PATH=${{ github.workspace }}/ms-playwright" >> $GITHUB_ENV
+      - name: Cache browsers
+        id: cache-browsers
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+      - name: Download browsers
+        if: steps.cache-browsers.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
-      # # running tests
-      # - run: npx playwright test --browser=${{ matrix.browser }}
-      # - name: Upload Artifacts
-      #   if: failure()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ matrix.browser }}-${{ matrix.os }}-test-results
-      #     path: test-results/
-      #     retention-days: 7
+      # running tests
+      - run: npx playwright test --browser=${{ matrix.browser }}
+      - name: Upload Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.browser }}-${{ matrix.os }}-test-results
+          path: test-results/
+          retention-days: 7
 
   e2e-macOS-webkit:
     # timeout-minutes: 60
