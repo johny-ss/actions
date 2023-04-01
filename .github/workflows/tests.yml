@@ -12,39 +12,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e:
-    # timeout-minutes: 60
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false # keep running other jobs if one fails
-      matrix:
-        os: [macos-latest] #, windows-latest, ubuntu-latest]
-        browser: ["webkit"] #, "chromium", "firefox"]
-        # browser: ["chromium", "firefox"]
-        # include:
-        #   - os: macos-latest
-        #     browser: "webkit"
-    env:
-      # Playwright uses this env var for the browser install path. See:
-      # https://playwright.dev/docs/ci#directories-to-cache
-      # It makes most sense to default this to something cross-platform
-      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
+  # e2e:
+  #   # timeout-minutes: 60
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false # keep running other jobs if one fails
+  #     matrix:
+  #       os: [macos-latest] #, windows-latest, ubuntu-latest]
+  #       browser: ["webkit"] #, "chromium", "firefox"]
+  #       # browser: ["chromium", "firefox"]
+  #       # include:
+  #       #   - os: macos-latest
+  #       #     browser: "webkit"
+  #   env:
+  #     # Playwright uses this env var for the browser install path. See:
+  #     # https://playwright.dev/docs/ci#directories-to-cache
+  #     # It makes most sense to default this to something cross-platform
+  #     PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
 
-      # installing dependencies with cache
-      - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v3
-        with:
-          path: ./node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
-      - name: Install dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
+  #     # installing dependencies with cache
+  #     - name: Cache dependencies
+  #       id: cache-deps
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ./node_modules
+  #         key: modules-${{ hashFiles('package-lock.json') }}
+  #     - name: Install dependencies
+  #       if: steps.cache-deps.outputs.cache-hit != 'true'
+  #       run: npm ci --ignore-scripts
 
       # installing browsers with cache
       # - name: Store Playwright's Version
@@ -74,32 +74,31 @@ jobs:
           path: test-results/
           retention-days: 7
 
-  e2e-macOS-webkit:
-    # timeout-minutes: 60
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false # keep running other jobs if one fails
-      matrix:
-        os: [macos-latest]
-        browser: ["webkit"]
-    env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
+  # e2e-macOS-webkit:
+  #   # timeout-minutes: 60
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false # keep running other jobs if one fails
+  #     matrix:
+  #       os: [macos-latest]
+  #       browser: ["webkit"]
+  #   env:
+  #     PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
 
-      # installing dependencies with cache
-      - name: Install dependencies
-        run: npm ci
+  #     # installing dependencies with cache
+  #     - name: Install dependencies
+  #       run: npm ci
 
-      - name: Download browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
-      - run: npx playwright test --browser=${{ matrix.browser }}
+  #     - name: Download browsers
+  #       run: npx playwright install --with-deps ${{ matrix.browser }}
+  #     - run: npx playwright test --browser=${{ matrix.browser }}
     
   e2e-mac:
-    if: github.repository_owner == 'facebook'
     runs-on: macos-latest
     strategy:
       matrix:
