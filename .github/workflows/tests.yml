@@ -74,29 +74,48 @@ jobs:
       #     path: test-results/
       #     retention-days: 7
 
-  # e2e-macOS-webkit:
-  #   # timeout-minutes: 60
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false # keep running other jobs if one fails
-  #     matrix:
-  #       os: [macos-latest]
-  #       browser: ["webkit"]
-  #   env:
-  #     PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16
+  e2e-macOS-webkit:
+    # timeout-minutes: 60
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false # keep running other jobs if one fails
+      matrix:
+        os: [macos-latest]
+        browser: ["webkit"]
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
-  #     # installing dependencies with cache
-  #     - name: Install dependencies
-  #       run: npm ci
+      # installing dependencies with cache
+      - name: Install dependencies
+        run: npm ci
+      - run: npm i -g npm@8
 
-  #     - name: Download browsers
-  #       run: npx playwright install --with-deps ${{ matrix.browser }}
-  #     - run: npx playwright test --browser=${{ matrix.browser }}
+      # installing browsers with cache
+      - name: Store Playwright's Version
+        shell: bash #necessary for it to work on Windows, which uses powershell by default
+        run: |
+          echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')"
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+        id: playwright-version
+      - name: Cache browsers
+        id: cache-browsers
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+      - name: Download browsers
+        # if: steps.cache-browsers.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Download browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright test --browser=${{ matrix.browser }}
     
   e2e-mac:
     runs-on: macos-latest
@@ -125,13 +144,6 @@ jobs:
       - name: Download browsers
         run: npx playwright install
       - run: npx playwright test --browser=${{ matrix.browser }}
-      - name: Upload Artifacts
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: Test Results
-          path: test-results/
-          retention-days: 7
 
 
 
