@@ -25,6 +25,8 @@ jobs:
         include:
           - os: macos-latest
             browser: "webkit"
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -47,10 +49,10 @@ jobs:
         shell: bash #necessary for it to work on Windows, which uses powershell by default
         run: echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')" >> $GITHUB_OUTPUT
         id: playwright-version
-      - name: Set Path for Browser Binaries
+      # - name: Set Path for Browser Binaries
         # shell: bash #powershell (windows) uses '\' instead of '/' for paths
         # Alternatively, `PLAYWRIGHT_BROWSERS_PATH=0` install binaries in node_modules
-        run: echo "PLAYWRIGHT_BROWSERS_PATH=${{ github.workspace }}/ms-playwright" >> $GITHUB_ENV
+        # run: echo "PLAYWRIGHT_BROWSERS_PATH=${{ github.workspace }}/ms-playwright" >> $GITHUB_ENV
       - name: Cache browsers
         id: cache-browsers
         uses: actions/cache@v3
