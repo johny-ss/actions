@@ -48,10 +48,9 @@ jobs:
         run: echo "PLAYWRIGHT_VERSION=$(node -p 'require("@playwright/test/package.json").version')" >> $GITHUB_OUTPUT
         id: playwright-version
       - name: Set Path for Browser Binaries
-        shell: bash #powershell (windows) uses '\' instead of '/' for paths
+        # shell: bash #powershell (windows) uses '\' instead of '/' for paths
         # Alternatively, `PLAYWRIGHT_BROWSERS_PATH=0` install binaries in node_modules
-        run: |
-          echo "PLAYWRIGHT_BROWSERS_PATH=${{ github.workspace }}/ms-playwright/${{ matrix.browser }}" >> $GITHUB_ENV
+        run: echo "PLAYWRIGHT_BROWSERS_PATH=${{ github.workspace }}/ms-playwright" >> $GITHUB_ENV
       - name: Cache browsers
         id: cache-browsers
         uses: actions/cache@v3
@@ -60,7 +59,7 @@ jobs:
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
       - name: Download browsers
         if: steps.cache-browsers.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: npx playwright install --with-deps
 
       # running tests
       - run: npx playwright test --browser=${{ matrix.browser }}
