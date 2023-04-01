@@ -35,14 +35,14 @@ jobs:
           node-version: 16
 
       # installing dependencies with cache
-      # - name: Cache dependencies
-      #   id: cache-deps
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ./node_modules
-      #     key: modules-${{ hashFiles('package-lock.json') }}
+      - name: Cache dependencies
+        id: cache-deps
+        uses: actions/cache@v3
+        with:
+          path: ./node_modules
+          key: modules-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
-        # if: steps.cache-deps.outputs.cache-hit != 'true'
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
 
       # installing browsers with cache
@@ -61,7 +61,7 @@ jobs:
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
       - name: Download browsers
         if: steps.cache-browsers.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: npx playwright install --with-deps
 
       # running tests
       - run: npx playwright test --browser=${{ matrix.browser }}
