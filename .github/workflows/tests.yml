@@ -35,12 +35,12 @@ jobs:
           node-version: 16
 
       # installing dependencies with cache
-      - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v3
-        with:
-          path: ./node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
+      # - name: Cache dependencies
+      #   id: cache-deps
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ./node_modules
+      #     key: modules-${{ hashFiles('package-lock.json') }}
       - name: Install dependencies
         # if: steps.cache-deps.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
