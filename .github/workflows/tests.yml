@@ -74,6 +74,67 @@ jobs:
           path: test-results/
           retention-days: 7
 
+  e2e-macOS-webkit:
+    # timeout-minutes: 60
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false # keep running other jobs if one fails
+      matrix:
+        os: [macos-latest]
+        browser: ["webkit"]
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      # installing dependencies with cache
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright test --browser=${{ matrix.browser }}
+    
+  e2e-mac:
+    if: github.repository_owner == 'facebook'
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        node-version: [16.15.1]
+        browser: ['webkit']
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm i -g npm@8
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            node_modules
+            packages/playwright-core/node_modules
+            ~/Library/Caches/ms-playwright
+          key: ${{ runner.os }}-v${{ secrets.CACHE_VERSION }}-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Download browsers
+        run: npx playwright install
+      - run: npm run test-e2e-ci-${{ matrix.browser }}
+      - name: Upload Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Test Results
+          path: test-results/
+          retention-days: 7
+
+
 
   #       projects: [
   #   { name: "chromium", use: { ...devices["Desktop Chrome"] } },
@@ -82,3 +143,4 @@ jobs:
   #   { name: "Mobile Chrome", use: { ...devices["Pixel 5"] } },
   #   { name: "Mobile Safari", use: { ...devices["iPhone SE"] } },
   # ],
+
