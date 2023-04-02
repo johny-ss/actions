@@ -26,9 +26,7 @@ jobs:
           - os: macos-latest
             browser: webkit
     env:
-      # Playwright uses this env var for the browser install path. See:
-      # https://playwright.dev/docs/ci#directories-to-cache
-      # It makes most sense to default this to something cross-platform
+      # Alternatively, `PLAYWRIGHT_BROWSERS_PATH=0` install binaries in node_modules
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
     steps:
       - uses: actions/checkout@v3
@@ -56,14 +54,14 @@ jobs:
         id: cache-browsers
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+          key: ${{ runner.os }}-${{ matrix.browser }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
       - name: Download browsers
         if: steps.cache-browsers.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
       # running tests
-      - run: npx playwright test --project=${{ matrix.browser }}
+      - run: npx playwright test --browser=${{ matrix.browser }}
       - name: Upload Artifacts
         if: failure()
         uses: actions/upload-artifact@v3
