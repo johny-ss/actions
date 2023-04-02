@@ -17,22 +17,17 @@ jobs:
   e2e:
     # timeout-minutes: 60
     runs-on: ${{ matrix.os }}
+    env:
+      # Alternatively, `PLAYWRIGHT_BROWSERS_PATH=0` install binaries in node_modules
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright    
     strategy:
       fail-fast: false # keep running other jobs if one fails
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        browser: [chromium, firefox, webkit]
-        # include:
-        #   - os: macos-latest
-        #     browser: webkit
-        exclude:
+        include:
           - os: macos-latest
             browser: webkit
-          - os: windows-latest
-            browser: webkit
-    env:
-      # Alternatively, `PLAYWRIGHT_BROWSERS_PATH=0` install binaries in node_modules
-      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/ms-playwright
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
