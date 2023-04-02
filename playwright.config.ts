@@ -2,7 +2,6 @@ import type { PlaywrightTestConfig } from "@playwright/test";
 import { devices } from "@playwright/test";
 
 const config: PlaywrightTestConfig = {
-  testDir: "./src/e2e-tests",
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   reporter: process.env.CI ? "github" : "html",
