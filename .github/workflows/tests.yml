@@ -56,10 +56,15 @@ jobs:
       - name: Install Playwright browsers
         if: steps.cache-browsers.outputs.cache-hit != 'true'
         run: npx playwright install ${{ matrix.browser }}
-      # - name: Install Playwright dependencies
-      #   if: steps.cache-browsers.outputs.cache-hit != 'true'
-      #   run: npx playwright install-deps ${{ matrix.browser }}
-        # run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Install Playwright dependencies
+        # Linux and Windows cannot cache deps.
+        # See: https://github.com/microsoft/playwright/issues/22146#issuecomment-1495821016
+        # if: steps.cache-browsers.outputs.cache-hit != 'true' || runner.os != 'macOS'
+        # BUT except for linux-webkit, they already include most of the necessary dependencies.
+        # So unless you use things like graphics, fonts, video playback etc. and you run into a problem,
+        # You can speed up your CI by using this less strict condition:
+        if: steps.cache-browsers.outputs.cache-hit != 'true' || (runner.os == 'Linux' && matrix.browser == 'webkit')
+        run: npx playwright install-deps ${{ matrix.browser }}
 
       # running tests
       - run: npx playwright test --project=${{ matrix.browser }}
