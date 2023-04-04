@@ -19,7 +19,7 @@ jobs:
       fail-fast: false # keep running other jobs if one fails
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        browser: [chromium, firefox]
+        browser: [chromium, firefox, webkit]
     env:
       # Playwright uses different paths on different OS's. 
       # To make it work cross-platform, we need to set the path manually.
